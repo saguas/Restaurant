@@ -1,0 +1,67 @@
+<template name="TableChooserToggle">
+    <!--<div class="btn-group" data-toggle="buttons">-->
+    {{#let col=col offset=offset }}
+
+      {{#let t=getNumberOfFloors}}
+        {{#each tableRows in t.tables}}
+          <!--<div class="form-group">-->
+          <div class="row">
+              <div class="col-md-6">
+                  {{#each table in tableRows}}
+                      <div class="btn-group tables" data-toggle="buttons">
+                          <label class="btn btn-{{tableState table}} btn-sq-xs btn-sq-ssm btn-sq-sm btn-sq-md btn-sq-lg toggleBgColor {{table.disabled}} floors {{activeFloor table.name}}">
+                            {{#unless table.disabled}}
+                              <input type="radio" name="options" autocomplete="off" data-event-disabled="{{table.disabled}}" data-event-action="TableChooserToggleFloors" data-event-tablename={{table.name}} data-event-floor={{table.floor}} data-event-id="{{table._id}}">
+                            {{/unless}}
+                              {{#if table.clientId}}
+                                  <i class="hidden-xs icon-man-sitting-in-front-of-a-table-eating2"></i>
+                              {{else}}
+                                  <i class="hidden-xs icon-table-with-chair-white2"></i>
+                              {{/if}}
+                              <br class="hidden-xs"><span class="hidden-xs">{{table.name}}</span><span class="visible-xs-block">{{table.shortName}}</span>
+                          </label>
+                      </div>
+                  {{/each}}
+              </div>
+          </div>
+        {{/each}}
+      {{/let}}
+    <!--</div>-->
+
+    {{#if showTablesTitle}}
+      <div class="well well-sm text-center"><h4><strong>Tables</strong></h4></div>
+    {{/if}}
+    {{#if showTables}}
+      <!--<div class="btn-group" data-toggle="buttons">-->
+        {{#let t=getNumberOfRowsInTable}}
+          {{#each tableRows in t.tables}}
+            <div class="row">
+                <div class="col-md-{{col}} col-md-offset-{{offset}}">
+                  <!--<div class="form-group">-->
+                    {{#each table in tableRows}}
+                        <div class="btn-group tables" data-toggle="buttons">
+                            <label class="btn btn-{{tableState table}} btn-sq-xs btn-sq-ssm btn-sq-sm btn-sq-md btn-sq-lg toggleBgColor {{table.disabled}} tables">
+                              {{#unless table.disabled}}
+                                <input type="radio" name="options" autocomplete="off" data-event-clientId="{{table.clientId}}" data-event-disabled="{{table.disabled}}" data-event-action="TableChooserToggle" data-event-tablename={{table.name}} data-event-floor={{table.floor}} data-event-id="{{table._id}}">
+                              {{/unless}}
+                                {{#if table.clientId}}
+                                  <i class="hidden-xs icon-man-sitting-in-front-of-a-table-eating2"></i>
+                                {{else}}
+                                  <i class="hidden-xs icon-table-with-chair-white2"></i>
+                                {{/if}}
+                                <br class="hidden-xs">{{table.name}}<br class="hidden-xs">{{#if table.clientId}}<small class="hidden-xs">id:{{table.clientId}}</small>{{/if}}
+                             </label>
+                          </div>
+                    {{/each}}
+                </div>
+            </div>
+          {{/each}}
+        {{/let}}
+        {{#if goHome}}
+          <!--<button class="btn btn-primary btn-lg btn-block" data-event-action="TableChooserHome">Home</button>-->
+        {{/if}}
+      <!--</div>-->
+    {{/if}}
+
+  {{/let}}
+</template>

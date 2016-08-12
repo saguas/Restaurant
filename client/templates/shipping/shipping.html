@@ -1,0 +1,160 @@
+<template name="tableCheckPermissions">
+  <div class="panel-body">
+    {{#if shippingConfigured}}
+      {{#let sq=shipmentQuotes}}
+          {{#if sq }}
+            {{#if hasPermission vipPermissions}}
+              {{#if showBreadcrumb}}
+                  <ol class="breadcrumb">
+                    <!--<li><a class="breadcrumbMenu" data-event-breadcrumbMenuName="Home" href="#">Home</a></li>-->
+                    {{#if breadcrumbMiddleMenu}}
+                      <li><a class="breadcrumbMenu" data-event-breadcrumbMenuName="Home" href="#">Home</a></li>
+                    {{else}}
+                      <li class="active">Home</li>
+                    {{/if}}
+                    {{#each breadcrumbMiddleMenu}}
+                      {{#if breadcrumbMiddleMenuActive}}
+                        <li class="active">{{breadcrumbMiddleName}}</li>
+                      {{else}}
+                        <li><a class="breadcrumbMenu" data-event-breadcrumbMenuId="{{id}}" data-event-breadcrumbMenuName="{{breadcrumbMiddleName}}" href="#">{{breadcrumbMiddleName}}</a></li>
+                      {{/if}}
+                    {{/each}}
+                  </ol>
+              {{/if}}
+              {{#if showTablesOrClient}}
+                {{> TableChooserToggle col=9 offset=2}}
+              {{else}}
+                {{> ClientChooser}}
+              {{/if}}
+            {{else}}
+              {{#if clientHasTable}}
+                <p>Thanks for choose us. Have a nive meal.{{clientTable}}</p>
+              {{else}}
+                {{#if hasPermission vipPermissions}}
+                  {{#let typeNumFor=typeNumberFor}}
+                    <form>
+                      <div class="form-group">
+                        <label for="tableNumberIn">{{typeNumFor}} Number</label>
+                        <input type="text" class="form-control" id="tableNumberIn" placeholder="{{typeNumFor}} Number">
+                      </div>
+                      <span type="submit" class="btn btn-success btn-lg btn-block btn-saveTable" data-typeNumFor="{{typeNumFor}}" data-i18n="table.save" data-event-action="tableNumberSet" data-category="cart" data-method="{{sq.method}}">
+                          Save Table
+                      </span>
+                    </form>
+                  {{/let}}
+              {{else}}
+                <div class="bs-callout bs-callout-danger">
+                  <h4 data-i18n="table.calloutWaiter">To proceed with your order, please callout waiter.</h4>
+                  <p>{{i18n 'table.clientIdNumber' 'Your client number is:'}} <code>{{currentUser.clientId}}</code></p>
+                </div>
+              {{/if}}
+          {{/if}}
+          {{/if}}
+        {{else}}
+          {{>loading}}
+        {{/if}}
+      {{/let}}
+    {{else}}
+        <div class="alert alert-danger">
+          <span data-i18n="checkoutShipping.noShippingMethods">No table are allowed.</span>
+          <a href="{{pathFor 'dashboard/shipping'}}">
+            <span data-i18n="checkoutShipping.configureNow">Please, call the waither.</span>
+          </a>
+        </div>
+    {{/if}}
+  </div>
+</template>
+
+<template name="TableChooser">
+        <div data-toggle="buttons">
+            {{#each tableRows in getNumberOfRowsInTable}}
+              <!--<div class="row">-->
+                <!--<div class="btn-toolbar" role="toolbar" aria-label="row">-->
+                    {{> ButtonTableToggle tableRows.tables}}
+                <!--</div>-->
+              <!--</div>-->
+            {{/each}}
+        </div>
+</template>
+
+<!--
+<template name="TableChooserToggle">
+    <div class="btn-group" data-toggle="buttons">
+      <div class="form-group">
+        {{#each table in getNumberOfRowsInTable}}
+
+              <label class="btn btn-{{table.state}} btn-sq-xs btn-sq-sm btn-sq-md toggleBgColor">
+                <input type="radio" name="options" autocomplete="off" class="circleOut" data-event-action="TableChoosertoggle" data-event-id="{{table._id}}" data-event-floor="{{table.floor}}"> <i class="hidden-xs fa fa-user fa-2x"></i><br class="hidden-xs">{{table.name}}
+              </label>
+        {{/each}}
+        </div>
+    </div>
+</template>
+-->
+
+
+
+<!--
+<template name="TableChooserToggle">
+    <div class="btn-group" data-toggle="buttons">
+        {{#each tableRows in getNumberOfRowsInTable}}
+          <div class="form-group">
+            {{#each table in tableRows.tables}}
+              <label class="btn btn-{{table.state}} btn-sq-xs btn-sq-sm btn-sq-md toggleBgColor">
+                <input type="radio" name="options" autocomplete="off" class="circleOut"> <i class="hidden-xs fa fa-user fa-2x"></i><br class="hidden-xs">{{table.number}}
+              </label>
+            {{/each}}
+          </div>
+        {{/each}}
+    </div>
+</template>
+-->
+
+<template name="ButtonTableToggle">
+    <div class="form-group">
+      {{#each table in this}}
+        <label class="btn btn-{{table.state}} btn-sq-xs btn-sq-sm btn-sq-md">
+          <input type="radio" name="options" autocomplete="off"> <span class="linebreak"></span><i class="hidden-xs fa fa-user fa-2x"></i><br class="hidden-xs">{{table.number}}
+        </label>
+      {{/each}}
+    </div>
+</template>
+
+<template name="ButtonTable">
+    <div class="form-groups">
+      {{#each table in this}}
+        <!--<div class="col-lg-4 col-md-4">-->
+          <div class="btn-group btn-sq-xs btn-sq-sm btn-sq-md" role="group" aria-label="col {{table.col}}">
+            <button type="button" class="btn btn-{{table.state}} btn-sq-xs btn-sq-sm btn-sq-md" data-event-action="tableButton" data-event-tablenumber="{{table.number}}"><i class="hidden-xs fa fa-user fa-2x"></i><br class="hidden-xs">{{table.number}}</button>
+          </div>
+        <!--</div>-->
+      {{/each}}
+    </div>
+</template>
+
+
+
+<template name="TableChooserModal">
+    <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="modalTableChooser">Table Chooser</h4>
+          </div>
+          <div class="modal-body">
+            {{#each tableRows in getNumberOfRowsInTable}}
+              <div class="row">
+                <div class="btn-toolbar" role="toolbar" aria-label="row">
+                    {{> ButtonTable tableRows.tables}}
+                </div>
+              </div>
+            {{/each}}
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</template>

@@ -1,0 +1,53 @@
+
+
+<template name="tagItemBeesknees">
+  {{#if blank}}
+    {{> tagBlankBeesknees (tagBlankProps tag)}}
+  {{else}}
+    {{#if isEditing}}
+      {{> tagEditableBeesknees (tagEditableProps tag)}}
+    {{else}}
+      {{> tagLinkBeesknees}}
+    {{/if}}
+  {{/if}}
+</template>
+
+<template name="tagLinkBeesknees">
+  {{#with tag}}
+    <a class="rui tag link" href="{{pathFor "tag" slug=slug}}" data-id="{{_id}}">{{name}}</a>
+  {{/with}}
+</template>
+
+<template name="tagBlankBeesknees">
+  <div class="rui item edit create">
+    <div class="rui tag edit create">
+      {{> button icon="tag"}}
+      {{> textfield
+        name="tag"
+        onChange=handleTagNameUpdate
+        placeholder=(i18n "tags.addTag" "Add Tag")
+        value=tag.name
+      }}
+      {{> button type="submit" icon="plus" status="danger" onClick=handleTagRemove}}
+    </div>
+  </div>
+</template>
+
+<template name="tagEditableBeesknees">
+  <div class="rui item edit draggable">
+    <div class="rui tag edit draggable {{className}}" data-id={{tag._id}}>
+      {{> button icon="bars" className="js-drag-handle" status="default"}}
+      {{> textfield name="tag" value=tag.name onChange=handleTagNameUpdate}}
+      <button class="hidden" type="submit">Update Tag</button>
+      {{#if controls}}
+        {{#each control in controls}}
+          {{> button control}}
+        {{/each}}
+      {{/if}}
+      {{> button icon="times-circle" status="danger" onClick=handleTagRemove}}
+      {{#if selectable}}
+        {{> button icon="chevron-down" status="default" onClick=handleTagSelect}}
+      {{/if}}
+    </div>
+  </div>
+</template>

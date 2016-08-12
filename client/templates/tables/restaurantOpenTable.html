@@ -1,0 +1,35 @@
+<template name="restaurantOpenTable">
+    <div class="container container-sm">
+      <div class="checkout-steps">
+        <div class="checkout-steps-main">
+          {{#if showBreadcrumb}}
+              <ol class="breadcrumb">
+                {{#if breadcrumbMiddleMenu}}
+                  <li><a class="breadcrumbMenu" data-event-breadcrumbMenuName="Home" href="#">Home</a></li>
+                {{else}}
+                  <li class="active">Home</li>
+                {{/if}}
+                {{#each breadcrumbMiddleMenu}}
+                  {{#if breadcrumbMiddleMenuActive}}
+                    <li class="active">{{breadcrumbMiddleName}}</li>
+                  {{else}}
+                    <li><a class="breadcrumbMenu" data-event-breadcrumbMenuId="{{id}}" data-event-breadcrumbMenuName="{{breadcrumbMiddleName}}" href="#">{{breadcrumbMiddleName}}</a></li>
+                  {{/if}}
+                {{/each}}
+              </ol>
+          {{/if}}
+          <div id="tableError" class="alert alert-danger hidden">Oh! Snap!</div>
+          {{#if showTablesOrClient}}
+            {{> TableChooserToggle col=9 offset=2}}
+          {{else}}
+            {{> ClientChooser}}
+          {{/if}}
+        </div>
+        <div class="checkout-steps-side">
+          {{#each myreactionTemplate workflow="coreTableWorkflow" container="table-steps-side" id=currentId}}
+            {{> checkoutSteps (getDict this)}}
+          {{/each}}
+        </div>
+      </div>
+    </div>
+</template>

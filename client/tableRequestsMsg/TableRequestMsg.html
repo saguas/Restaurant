@@ -1,0 +1,16 @@
+
+<template name="restaurantNotify">
+  <div class="list-group">
+    <div href="#" class="list-group-item toast-info">
+      <h4 class="list-group-item-heading">Request Permission</h4>
+      <div class="alert toast-info" role="alert"><small>{{{doc.msg}}}</small></div>
+      <div class="checkbox">
+       <label>
+         <input type="checkbox"  data-event-action="checkboxIgnoreClient" data-event-clientId={{doc.fromId}}> Ignore further requests from this client (see profile to revert this choice).
+       </label>
+     </div>
+      <button type="button" class="btn btn-info" data-event-action="btnNotifyCancel" data-event-msgId={{doc._id}} data-event-msgDate={{date}}>DENY</button>
+      <button type="button" class="btn btn-info" data-event-clientId={{doc.fromId}} data-event-action="btnNotifyOk" data-event-msgId={{doc._id}} data-event-msgDate={{date}}>GRANT</button>
+    </div>
+  </div>
+</template>

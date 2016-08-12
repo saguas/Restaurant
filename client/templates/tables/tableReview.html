@@ -1,0 +1,36 @@
+<template name="tableReview">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      {{> checkoutStepBadge}}
+      <h3 class="panel-title" data-i18n="checkoutReview.review">Table Review</h3>
+    </div>
+    <div class="panel-body">
+      <form class="form-horizontal">
+        <div class="form-group">
+          <div class="btn-group" data-toggle="buttons">
+            <label class="btn btn-{{btnstatus 'Cash'}} active" {{isDisabled}}>
+              {{#unless isDisabled}}
+                <input type="radio" name="options" class="tablePayment" id="paycash" autocomplete="off" value="Cash" checked>
+              {{/unless}}
+              Cash
+            </label>
+            <label class="btn btn-{{btnstatus 'Atm'}}" {{isDisabled}}>
+              {{#unless isDisabled}}
+                <input type="radio" name="options" class="tablePayment" id="payatm" autocomplete="off" value="Atm">
+              {{/unless}}
+              ATM
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <div id="paymentError" class="alert alert-danger hidden">Oh! Snap!</div>
+          <!--<span class="label label-default">{{paymentMethodSeleted}}</span>-->
+          <button type="submit" id="payment" class="btn btn-success btn-lg btn-block" disabled={{isDisabled}}>
+            Payment
+            <i class="fa fa-spinner fa-spin hidden" id="btn-processing-payment"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</template>

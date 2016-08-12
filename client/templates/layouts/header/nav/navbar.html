@@ -1,0 +1,16 @@
+<template name="CoreNavigationBarBeesknees">
+  <div class="rui navbar">
+    <div class="showmenu">{{> button icon="bars" onClick=onMenuButtonClick}}</div>
+    {{> coreNavigationBrand}}
+    <div class="menu">
+      {{> tagNavBeesknees tagNavProps}}
+    </div>
+
+    <a href="#" class="languages"><span class="rticon"><i class="icon-restaurantopen2 restaurant-icon"></i></span></a>
+
+    <div class="languages hidden-xs">{{> i18nChooser}}</div>
+    <div class="accounts">{{> accounts tpl="loginDropdown"}}</div>
+    <div class="cart">{{> cartIcon}}</div>
+    <div class="cart-alert">{{> cartPanel}}</div>
+  </div>
+</template>
