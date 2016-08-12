@@ -313,13 +313,56 @@ const requestClosed = function(doc){
 }
 
 
+
+/*Template.onRendered(function () {
+  // Initialize all datepicker inputs whenever any template is rendered
+  this.autorun(function () {
+    let clientId = Meteor.user() && Meteor.user().clientId;
+    if (clientId){
+        Meteor.subscribe('ClientsTable', clientId);
+    }
+    console.log("ClientsTable subscribe inside onRendered clientId ", clientId);
+  });
+});*/
+
+/*let clisub;
+
+Tracker.autorun(function () {
+  const meteorStatus = Meteor.status();
+
+  if(clisub){
+    console.log("already has a subscribe to ClientsTable");
+    clisub.stop();
+  }
+
+  if(meteorStatus.connected){
+    let clientId = Meteor.user() && Meteor.user().clientId;
+    clisub = Meteor.subscribe('ClientsTable', clientId);
+    console.log("subscribe to ClientsTable");
+  }else{
+    if(clisub){
+      console.log("unsubscribe to ClientsTable");
+      clisub.stop();
+
+    }
+  }
+  console.log("meteor status alone ", meteorStatus);
+});*/
+
+
+
 Tracker.autorun(function () {
   if(Meteor.user()){
     const sub = Meteor.subscribe('UserClientId', Meteor.userId());
     if(sub.ready()){
       let clientId = Meteor.user().clientId;
-      const clisub = Meteor.subscribe('ClientsTable', clientId);
-      if(clisub.ready()){
+
+      let clisub;
+      if(Reaction.hasPermission(["client/table", "employee/employee", "employee/master", "admin"])){
+        clisub = Meteor.subscribe('ClientsTable', clientId);
+      }
+
+      if(clisub && clisub.ready()){
         Meteor.subscribe('TableRequestMsg', Meteor.userId(), clientId);
         var msgs = TableRequestMsg.find();
         msgs.observe({

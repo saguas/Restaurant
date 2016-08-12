@@ -29,6 +29,12 @@ const getDataFromTableChildrens = function(ArrayData){
 
 Tracker.autorun(function () {
 
+  /*const status = Meteor.status();
+  if (!status.connected && (status.status === "failed" || status.status === "offline")){
+    console.log("Meteor reconnecting!");
+    Meteor.reconnect();
+  }*/
+
   //Reaction.hasPermission is not reactive in meteor way. Need Meteor.userId() to make this subscription reactive
   if(Meteor.user() && Reaction.hasPermission(["employee/employee", "employee/master", "client/vip", "admin"])){
     const tableSub = Meteor.subscribe("TableMap");

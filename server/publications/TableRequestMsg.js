@@ -4,9 +4,12 @@ import { Match } from 'meteor/check';
 import { check } from 'meteor/check';
 import { TableRequestMsg } from "../../lib";
 
+
+
+
 Meteor.publish('TableRequestMsg', function(userId, clientId) {
   check(userId, String);
-  check(clientId, Number);
+  check(clientId, Match.Maybe(Number));
 
   if (this.userId === null) {
     return this.ready();
