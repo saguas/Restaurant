@@ -233,8 +233,9 @@ Template.TableChooserToggle.events({
     if (currFloor !== tablename){
       //parent.currentFloor.set(tablename);
       instance.dict.set("currentFloor", tablename);
-      parent.$(".tables.active").button('reset');
-      parent.$(".tables.active").removeClass("active");
+      //parent.$(".tables.active").button('reset');
+      parent.$(".btn-group.tables").removeClass("active").end().find('[type="radio"][data-event-floor="true"]').prop('checked', false);
+      //parent.$(".tables.active").removeClass("active");
     }else if(currFloor === tablename){
       return;
     }

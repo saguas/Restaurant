@@ -65,21 +65,27 @@ const cartResetShipmentMethod = function (cart, userId) {
 
 
 const openClientsTable = function(data){
-  let shopId = data.shopId;
-  let cartData = data.cartData;
-  let ownerUserId = data.ownerUserId;
-  let cartId = data.cartId;
+  const shopId = data.shopId;
+  const cartData = data.cartData;
+  const ownerUserId = data.ownerUserId;
+  const cartId = data.cartId;
   let clientUserId = data.clientUserId;
+  const creatorCid = data.creatorCid;
+  const masterName = data.masterName;
 
   let id;
   let userId;
-  let clientId = cartData.clientId;
+  const clientId = cartData.clientId;
+
+  const tableParts = cartData.tableName.split(":");
+  const floor = tableParts[0];
+  const tableName = tableParts[1];
 
   if(!clientUserId){
     //if not client/vip. if client/vip we can get userId by this.userId.
     try {
       userId = RestaurantLib.getUserIdFromClientId(clientId);
-      setClientPermissions(userId, ["client/table"], shopId);
+      setClientPermissions(userId, ["client/table", `${floor}/${tableName}`], shopId);
       clientUserId = userId;
     } catch(err){
       let error = `There is no client with this number ${clientId}.`;
@@ -89,11 +95,7 @@ const openClientsTable = function(data){
     };
   }
 
-  id = insertOnClientsTable(ownerUserId, clientUserId, cartId, clientId, cartData.tableName);
-
-  let tableParts = cartData.tableName.split(":");
-  let floor = tableParts[0];
-  let tableName = tableParts[1];
+  id = insertOnClientsTable(ownerUserId, creatorCid, clientUserId, cartId, clientId, masterName, cartData.tableName);
 
   setTableMapOccupation(floor, tableName, clientId);
 
@@ -354,15 +356,17 @@ const checkIfClientHasTable = function(clientId, status="opened"){
     });
 }
 
-const insertOnClientsTable = function(creatorId, userId, cartId, clientId, tableName, status="opened", shopId=Reaction.getShopId()){
+const insertOnClientsTable = function(creatorId, creatorCid, userId, cartId, clientId, masterName, tableName, status="opened", shopId=Reaction.getShopId()){
   let doc = {
     creatorId: creatorId,
+    creatorCid: creatorCid,
     userId: userId,
     cartsId:cartId && [cartId] || [],
     shopId: shopId,
     clients:[],
     ignores:[],
     masterClientNumber: clientId,
+    masterName: masterName,
     tableNumber: tableName,
     status: status,
     workflow: {
@@ -387,6 +391,29 @@ const numberClientTables = function(clientId){
   }).count();
 }
 
+const removePermissionsForClientAdded = function(tableName, clientId, shopId){
+  const userId = RestaurantLib.getUserIdFromClientId(clientId);
+  const tableParts = tableName.split(":");
+
+  if (isLastClientTable(clientId)){
+    removeClientPermissions(userId, ["client/table", `${tableParts[0]}/${tableParts[1]}`], shopId);
+  }else{
+    removeClientPermissions(userId, [`${tableParts[0]}/${tableParts[1]}`], shopId);
+  }
+}
+
+const removeClientFromMongoCliensTable = function(tableName, masterId, clientId, shopId){
+  return ClientsTable.update({
+    shopId: shopId,
+    status:{ $in: ["opened"]},
+    tableNumber: tableName,
+    masterClientNumber: masterId
+  },
+    {$pull:{clients: clientId}},
+    {multi: true }
+  );
+}
+
 const removePermissionsForClientLastTable = function(collection, tableName, clientId, shopId){
   const doc = ClientsTable.findOne({
     status:{ $in: ["opened", "closed", "payment"]},
@@ -401,14 +428,17 @@ const removePermissionsForClientLastTable = function(collection, tableName, clie
 
   if(doc){
     const masterId = doc.masterClientNumber;
+    const tableParts = tableName.split(":");
     if (isLastClientTable(masterId)){
       const userId = RestaurantLib.getUserIdFromClientId(masterId);
-      removeClientPermissions(userId, ["client/table"], shopId);
+      removeClientPermissions(userId, ["client/table", `${tableParts[0]}/${tableParts[1]}`], shopId);
     }
     _.forEach(doc.clients, function(cid) {
+      const userId = RestaurantLib.getUserIdFromClientId(cid);
       if (isLastClientTable(cid)){
-        const userId = RestaurantLib.getUserIdFromClientId(cid);
-        removeClientPermissions(userId, ["client/table"], shopId);
+        removeClientPermissions(userId, ["client/table", `${tableParts[0]}/${tableParts[1]}`], shopId);
+      }else{
+        removeClientPermissions(userId, [`${tableParts[0]}/${tableParts[1]}`], shopId);
       }
     });
     return;
@@ -461,6 +491,8 @@ const Restaurant = Object.assign({
   checkIfClientHasTable,
   insertOnClientsTable,
   numberClientTables,
+  removeClientFromMongoCliensTable,
+  removePermissionsForClientAdded,
   removePermissionsForClientLastTable,
   isLastClientTable,
   initializeTables

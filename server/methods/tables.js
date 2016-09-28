@@ -2,7 +2,7 @@ import { Meteor } from "meteor/meteor";
 import { check, Match } from "meteor/check";
 import { Reaction, Logger } from "/server/api";
 import { Cart } from "/lib/collections";
-import { ClientsTable, ClientsTableHistory } from "/imports/plugins/custom/beesknees/lib";
+import { ClientsTable, ClientsTableHistory, TableRequestMsg } from "/imports/plugins/custom/beesknees/lib";
 import { Restaurant } from "../";
 
 
@@ -19,26 +19,100 @@ const getErrorResult = function(error){
 
 
 Meteor.methods({
-  "table/addClientTablePermission": function (clientId, tableName) {
+  "table/removeClientTablePermission": function (clientId, tableName, toClientId) {
     check(clientId, Number);
-    check(tableName, String);
+    check(tableName, Match.Maybe(String));
+    check(toClientId, Match.Maybe(Number));
 
     const shopId = Reaction.getShopId();
 
-    ClientsTable.update({userId: this.userId, tableNumber: tableName, shopId: shopId}, {$addToSet:{clients: clientId}});
-    const userId = Restaurant.getUserIdFromClientId(clientId);
-    const permissions = ["admin", "employee/employee", "employee/master"];
-    if(!Roles.userIsInRole(userId, permissions, shopId)){
-      Restaurant.setClientPermissions(userId, ["client/table"], shopId);
-    }
+    const clientUserId = Restaurant.getUserIdFromClientId(clientId);
+    const toClientUserId = Restaurant.getUserIdFromClientId(toClientId);
 
-    result = {
+    const permissions = ["admin", "employee/employee", "employee/master"];
+    //only can remove the clients involve and the master client and any employee and admin
+    if(!Roles.userIsInRole(this.userId, permissions, shopId) && clientUserId !== this.userId && toClientUserId !== this.userId){
+      //if(clientUserId !== this.userId && toClientId !== this.userId){
+      const error = "User does not have permissions to remove from a table.";
+      return getErrorResult(error);
+      //}
+    };
+
+    console.log("tableName in removeClientTablePermission ", tableName);
+    /*if(!tableName){
+      const clientsTable = ClientsTable.findOne({
+          status:{ $in: ["opened"]},
+          $or:[{
+            clients: {$in:[clientId]}
+          },
+          {
+            masterClientNumber: toClientId
+          }]
+        });
+      if(clientsTable){
+        tableName = clientsTable.tableNumber;
+      }else{
+        const error = `User ${clientId} does not have a table.`;
+        return getErrorResult(error);
+      }
+
+      //Restaurant.removePermissionsForClientAdded(ClientsTable, tableName, toClientId, clientId, shopId);
+    }*/
+
+    Restaurant.removePermissionsForClientAdded(tableName, clientId, shopId);
+    Restaurant.removeClientFromMongoCliensTable(tableName, toClientId, clientId, shopId);
+    //Restaurant.removeClientsTable(ClientsTable, tableName, clientId, shopId);
+
+    /*const tableParts = tableName.split(":");
+    const floor = tableParts[0];
+    const tableNumber = tableParts[1];*/
+
+    //Restaurant.removeClientPermissions(userId, ["client/table", `${tableParts[0]}/${tableParts[1]}`], shopId);
+
+    //Restaurant.removeClientFromTable(floor, tableNumber, clientId);
+
+    return  {
       saved: true,
       status: "updated",
       userId: this.userId
     };
 
-    return result;
+  },
+  "table/addClientTablePermission": function (clientId, tableName) {
+    check(clientId, Number);
+    check(tableName, String);
+
+    const shopId = Reaction.getShopId();
+    const permissions = ["admin", "employee/employee", "employee/master"];
+    let update = 0;
+
+    if(Roles.userIsInRole(this.userId, permissions, shopId)){
+      update = ClientsTable.update({tableNumber: tableName, shopId: shopId}, {$addToSet:{clients: clientId}});
+    }else{
+      //only update if clientId is for master client. Any other client can't update.
+      update = ClientsTable.update({userId: this.userId, tableNumber: tableName, shopId: shopId}, {$addToSet:{clients: clientId}});
+    }
+    if(update){
+        const clientUserId = Restaurant.getUserIdFromClientId(clientId);
+        if(!Roles.userIsInRole(clientUserId, permissions, shopId)){
+          const tableParts = tableName.split(":");
+          Restaurant.setClientPermissions(clientUserId, ["client/table", `${tableParts[0]}/${tableParts[1]}`], shopId);
+        }
+        return  {
+          saved: true,
+          status: "updated",
+          tableName: tableName,
+          userId: this.userId
+        };
+
+    };
+    return  {
+      saved: false,
+      status: "error",
+      tableName: tableName,
+      userId: this.userId
+    };
+
 
   },
   /**
@@ -70,7 +144,7 @@ Meteor.methods({
         }
     }*/
 
-    if(Reaction.hasPermission(["employee/employee", "employee/master", "admin", "owner"])){
+    if(Reaction.hasPermission(["employee/employee", "employee/master", "admin"])){
       let cartData = {
         clientId: clientId,
         tableName: tableName
@@ -80,6 +154,8 @@ Meteor.methods({
         shopId: shopId,
         cartData: cartData,
         ownerUserId: this.userId,
+        creatorCid: Meteor.user().clientId,
+        masterName: Meteor.users.findOne({clientId: clientId}).username,
         cartId: cartId
       };
       try {
@@ -115,7 +191,7 @@ Meteor.methods({
       return result;
     }
 
-    let error = "User does not have permissions to open a table.";
+    const error = "User does not have permissions to open a table.";
     return getErrorResult(error);
   },
 
@@ -131,6 +207,10 @@ Meteor.methods({
     let cartId;
     let id;
     const shopId = Reaction.getShopId();
+    if(!Reaction.hasPermission(["employee/employee", "employee/master", "admin"])){
+      const error = "User does not have permissions to close a table.";
+      return getErrorResult(error);
+    }
     /*const cart = Cart.findOne({
         userId:this.userId,
         shopId: shopId,
@@ -176,6 +256,11 @@ Meteor.methods({
 
     const shopId = Reaction.getShopId();
 
+    if(!Reaction.hasPermission(["employee/employee", "employee/master", "admin"])){
+      const error = "User does not have permissions to payment a table.";
+      return getErrorResult(error);
+    }
+
     const status = "payment";
     const workflowStatus = "tablePayment";
     const workflow = "tableReview";
@@ -205,6 +290,11 @@ Meteor.methods({
       simpleInvoice: Match.Optional(Boolean)
     });
 
+    if(!Reaction.hasPermission(["employee/employee", "employee/master", "admin"])){
+      const error = "User does not have permissions to paid-invoices for a table.";
+      return getErrorResult(error);
+    }
+
     const shopId = Reaction.getShopId();
 
     const status = "paid";
@@ -224,6 +314,9 @@ Meteor.methods({
     Restaurant.removeClientsTable(ClientsTable, tableName, clientId, shopId);
 
     //Restaurant.resetCartWorkflowTo(clientId);
+
+    //TODO: colocar delivered em todas as mensagens referentes ao utilizador master.
+    TableRequestMsg.update({$or:[{fromClientId: clientId}, {toClientId: clientId}]}, {$set:{delivered: true, pinned: false}}, {multi:true});
 
     const tableParts = tableName.split(":");
     const floor = tableParts[0];

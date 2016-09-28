@@ -19,7 +19,7 @@ Meteor.publish('TableRequestMsg', function(userId, clientId) {
     return this.ready();
   }
   let fromUser = Meteor.users.findOne({_id: this.userId});
-  const permissions = ["admin"];//Admin can see all messages
+  let permissions = ["admin"];//Admin can see all messages
   if (Roles.userIsInRole(this.userId,
     permissions, shopId ||
     Roles.userIsInRole(this.userId, permissions, Roles.GLOBAL_GROUP))) {
@@ -29,6 +29,17 @@ Meteor.publish('TableRequestMsg', function(userId, clientId) {
         }
       );
   }
+  permissions = ["employee/employee", "employee/master"];//Admin can see all messages
+  if (Roles.userIsInRole(this.userId,
+    permissions, shopId ||
+    Roles.userIsInRole(this.userId, permissions, Roles.GLOBAL_GROUP))) {
+      return TableRequestMsg.find({
+        shopId: shopId,
+        pinned: true,
+        delivered: false,
+        status: { $in: ["new", "removed"]}
+      });
+  }
   /*
   const clientPermissions = ["client/table", "client/vip"];
   if (clientId && Roles.userIsInRole(this.userId, clientPermissions, shopId)){*/
@@ -36,13 +47,14 @@ Meteor.publish('TableRequestMsg', function(userId, clientId) {
   return TableRequestMsg.find({
     shopId: shopId,
     //fromId: fromId,
+    delivered: false,
     $or:[{
-      toId: clientId,
+      toClientId: clientId,
     },
     {
-      fromId: fromUser.clientId,
+      fromClientId: fromUser.clientId,
     }],
-    status: { $in: ["new", "refused", "accepted", "timeout", "closed", "ignored"]}
+    status: { $in: ["new", "removed"]}
   });
   /*}else{
     return this.ready();

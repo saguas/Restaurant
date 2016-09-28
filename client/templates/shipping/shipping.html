@@ -1,34 +1,35 @@
 <template name="tableCheckPermissions">
   <div class="panel-body">
-    {{#if shippingConfigured}}
+    {{#if Template.subscriptionsReady}}
       {{#let sq=shipmentQuotes}}
           {{#if sq }}
             {{#if hasPermission vipPermissions}}
-              {{#if showBreadcrumb}}
-                  <ol class="breadcrumb">
-                    <!--<li><a class="breadcrumbMenu" data-event-breadcrumbMenuName="Home" href="#">Home</a></li>-->
-                    {{#if breadcrumbMiddleMenu}}
-                      <li><a class="breadcrumbMenu" data-event-breadcrumbMenuName="Home" href="#">Home</a></li>
-                    {{else}}
-                      <li class="active">Home</li>
-                    {{/if}}
-                    {{#each breadcrumbMiddleMenu}}
-                      {{#if breadcrumbMiddleMenuActive}}
-                        <li class="active">{{breadcrumbMiddleName}}</li>
+                {{#if showBreadcrumb}}
+                    <ol class="breadcrumb">
+                      <!--<li><a class="breadcrumbMenu" data-event-breadcrumbMenuName="Home" href="#">Home</a></li>-->
+                      {{#if breadcrumbMiddleMenu}}
+                        <li><a class="breadcrumbMenu" data-event-breadcrumbMenuName="Home" href="#">Home</a></li>
                       {{else}}
-                        <li><a class="breadcrumbMenu" data-event-breadcrumbMenuId="{{id}}" data-event-breadcrumbMenuName="{{breadcrumbMiddleName}}" href="#">{{breadcrumbMiddleName}}</a></li>
+                        <li class="active">Home</li>
                       {{/if}}
-                    {{/each}}
-                  </ol>
-              {{/if}}
-              {{#if showTablesOrClient}}
-                {{> TableChooserToggle col=9 offset=2}}
-              {{else}}
-                {{> ClientChooser}}
-              {{/if}}
+                      {{#each breadcrumbMiddleMenu}}
+                        {{#if breadcrumbMiddleMenuActive}}
+                          <li class="active">{{breadcrumbMiddleName}}</li>
+                        {{else}}
+                          <li><a class="breadcrumbMenu" data-event-breadcrumbMenuId="{{id}}" data-event-breadcrumbMenuName="{{breadcrumbMiddleName}}" href="#">{{breadcrumbMiddleName}}</a></li>
+                        {{/if}}
+                      {{/each}}
+                    </ol>
+                {{/if}}
+                {{#if showTablesOrClient}}
+                  {{> TableChooserToggle col=9 offset=2}}
+                {{else}}
+                  {{> ClientChooser}}
+                {{/if}}
             {{else}}
               {{#if clientHasTable}}
                 <p>Thanks for choose us. Have a nive meal.{{clientTable}}</p>
+                {{> guestClientsInTable}}
               {{else}}
                 {{#if hasPermission vipPermissions}}
                   {{#let typeNumFor=typeNumberFor}}
@@ -42,24 +43,28 @@
                       </span>
                     </form>
                   {{/let}}
-              {{else}}
-                <div class="bs-callout bs-callout-danger">
-                  <h4 data-i18n="table.calloutWaiter">To proceed with your order, please callout waiter.</h4>
-                  <p>{{i18n 'table.clientIdNumber' 'Your client number is:'}} <code>{{currentUser.clientId}}</code></p>
-                </div>
+                {{else}}
+                  <div class="bs-callout bs-callout-danger">
+                    <h4 data-i18n="table.calloutWaiter">To proceed with your order, please callout waiter.</h4>
+                    <p>{{i18n 'table.clientIdNumber' 'Your client number is:'}} <code>{{currentUser.clientId}}</code></p>
+                    {{> requestClientTable }}
+                  </div>
+                {{/if}}
               {{/if}}
-          {{/if}}
-          {{/if}}
+              {{/if}}
         {{else}}
-          {{>loading}}
+          <div class="alert alert-danger">
+            <span data-i18n="checkoutShipping.noShippingMethods">Your cart timeout! Please empty your shopping cart and try again.</span>
+          </div>
         {{/if}}
       {{/let}}
     {{else}}
         <div class="alert alert-danger">
-          <span data-i18n="checkoutShipping.noShippingMethods">No table are allowed.</span>
+          <span data-i18n="checkoutShipping.noShippingMethods">Please refresh your browser.</span>
           <a href="{{pathFor 'dashboard/shipping'}}">
             <span data-i18n="checkoutShipping.configureNow">Please, call the waither.</span>
           </a>
+          <i class="fa fa-spinner fa-spin" id="btn-shipping-processing"></i>
         </div>
     {{/if}}
   </div>

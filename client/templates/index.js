@@ -1,5 +1,5 @@
 import "./myTemplate.html";
-
+import "./spinner.html";
 // layouts
 import "./layouts/core.html";
 import "./layouts/core.js";
@@ -127,6 +127,10 @@ import "./tables/tablePayment.html";
 import "./tables/tablePayment.js";
 import "./tables/restaurantOpenTable.html";
 import "./tables/restaurantOpenTable.js";
+import "./tables/requestClientTable.html";
+import "./tables/requestClientTable.js";
+import "./tables/guestClientsInTable.html";
+import "./tables/guestClientsInTable.js";
 
 
 import "./shipping.html";

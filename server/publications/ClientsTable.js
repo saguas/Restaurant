@@ -96,19 +96,44 @@ Meteor.publish("ClientsTable", function (clientId) {
       );
   }
 
+  return ClientsTable.find(
+    {
+      shopId: shopId,
+      status: { $in: ["opened", "closed", "payment"]},
+      $or:[{
+        clients: {$in:[clientId]}
+      },
+      {
+        masterClientNumber: clientId
+      }]
+    }
+  );
+
+  /*let isMasterUser;
   const clientPermissions = ["client/table"];
   if (clientId && Roles.userIsInRole(this.userId, clientPermissions, shopId)){
     check(clientId, Number);
 
-    return ClientsTable.find({
+    isMasterUser = ClientsTable.find({
       shopId: shopId,
       userId: this.userId,
       masterClientNumber: clientId,
       status: { $in: ["opened", "closed", "payment"]}
       });
+  }
+
+  if (isMasterUser && isMasterUser.count() === 0 && clientId && Roles.userIsInRole(this.userId, clientPermissions, shopId)){
+      check(clientId, Number);
+      return ClientsTable.find({
+        shopId: shopId,
+        clients: {$in:[clientId]},
+        status: { $in: ["opened", "closed", "payment"]}
+      }, {fields:{cartsId: 0, ignores: 0}});
+  }else if(isMasterUser && isMasterUser.count() > 0){
+      return isMasterUser;
   }else{
     return this.ready();
-  }
+  }*/
 });
 
 

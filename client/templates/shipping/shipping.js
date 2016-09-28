@@ -5,7 +5,7 @@ import { Template } from "meteor/templating";
 import { Session } from "meteor/session";
 import { Blaze } from 'meteor/blaze';
 import { ReactiveDict } from "meteor/reactive-dict";
-import { Reaction } from "/client/api";
+import { Reaction, Logger } from "/client/api";
 import { Restaurant, TableMap, ClientsTable } from "../../../lib";
 
 //Template.tableCheckPermissions.inheritsHelpersFrom("coreCheckoutShippingBeesknees");
@@ -62,7 +62,7 @@ function cartShippingFreeMethod(currentCart) {
 // until we handle multiple methods, we just use the first
 function cartShippingMethods(currentCart) {
   let cart = currentCart || Cart.findOne();
-  console.log("in tableCheckPermissions shipping ", cart);
+  console.log("in tableCheckPermissions method cartShippingMethods ", cart);
   if (cart) {
     if (cart.shipping) {
       if (cart.shipping[0].shipmentQuotes) {
@@ -123,6 +123,9 @@ Template.tableCheckPermissions.onCreated(function () {
   this.getTableMap = Restaurant.getTableMap;
   this.setShipmentMethod = setShipmentMethod;
   this.isNextKeyDisabled = isNextKeyDisabled;
+  //this.removedMsg = new ReactiveVar();
+  //this.requestsPendents = new ReactiveVar([]);
+
 
   //Dictionary to share with shipping; tableChooser, clinetChooser
   this.dict = new ReactiveDict();
@@ -161,7 +164,7 @@ Template.tableCheckPermissions.onCreated(function () {
 
   this.autorun(() => {
     this.subscribe("Shipping");
-    if (this.subscriptionsReady() && Reaction.hasPermission(["employee/employee", "employee/master", "admin", "owner"])) {
+    if (this.subscriptionsReady() && Reaction.hasPermission(["employee/employee", "employee/master", "admin"])) {
       Restaurant.prepareTableMap(this.dict);
       /*let countTables = this.getTableMap(this.dict);
       let tablesFloor = countTables > 1;
@@ -203,6 +206,15 @@ Template.tableCheckPermissions.onCreated(function () {
 });
 
 
+
+/*Template.tableCheckPermissions.onRendered(function () {
+  if(this.subscriptionsReady()){
+    this.$("#btn-shipping-processing").addClass("hidden");
+  }else{
+    this.$("#btn-shipping-processing").removeClass("hidden");
+  }
+});*/
+
 Template.tableCheckPermissions.helpers({
   shipmentQuotes: function () {
     const instance = Template.instance();
@@ -218,15 +230,18 @@ Template.tableCheckPermissions.helpers({
   },
 
   // helper to make sure there are some shipping providers
-  shippingConfigured: function () {
+  /*shippingConfigured: function () {
     const instance = Template.instance();
+    console.log("in shippingConfigured ready subscribe shipping? ", instance.subscriptionsReady());
     if (instance.subscriptionsReady()) {
       //return undefined;
-      return Shipping.find({
+      const count = Shipping.find({
         "methods.enabled": true
       }).count();
+      console.log("in shippingConfigured ", count);
+      return count;
     }
-  },
+  },*/
 
   // helper to display currently selected shipmentMethod
   isSelected: function () {
@@ -293,6 +308,37 @@ Template.tableCheckPermissions.helpers({
   }
 });
 
+/*
+const removeRequest = function(doc){
+  const fromClientId = doc.fromClientId;
+  const toClientId = doc.toClientId;
+
+  Meteor.call("table/removeClientTablePermission", fromClientId, "", toClientId, function (error, result) {
+    if(error){
+      console.log("Error in call to table/removeClientTablePermission ", error);
+      //TODO: aqui remover a entrada no clientsTable
+      return ;
+    }
+  });
+}*/
+
+/*
+const registerEmmiterOnce = function(msgid, fromClientId, toClientId, instance){
+
+  Restaurant.emmiter.once(`${msgid}`, function(doc){
+    const msgs = TableRequestMsg.findOne({_id: doc.responseToMsgId, status: "removed"});
+    if(msgs && doc.reason === "accepted"){
+      removeRequest(msgs);
+      Restaurant.Messenger.upadateTableRequestDelivered(doc._id);
+    }else{
+      Restaurant.Messenger.processRequestNotDelivered(doc, fromClientId);
+    }
+    Restaurant.Messenger.upadateTableRequestDelivered(doc.responseToMsgId);
+  });
+
+};*/
+
+
 Template.tableCheckPermissions.events({
   "click [data-event-action=tableNumberSet]": function (event, instance) {
     event.preventDefault();
@@ -324,7 +370,8 @@ Template.tableCheckPermissions.events({
       //instance.breadCrumbMiddleMenu.set([]);
       instance.dict.set("breadCrumbMiddleMenu",[]);
 
-      instance.$(".floors.active").button('reset');
+      //instance.$(".floors.active").button('reset');
+      $(".btn-group.tables").removeClass("active").end().find('[type="radio"][data-event-floor="true"]').prop('checked', false);
       //instance.$(".floors.active").removeClass("active");
       Restaurant.resetTables(instance.dict);
 

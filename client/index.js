@@ -2,6 +2,7 @@
 //import "./tableRequestsMsg/TableRequestMsg.html";
 //import "./tableRequestsMsg/TableRequestMsgHelper.js";
 import "./globals.js";
+//import "toastr/toastr.less";
 import "./styles/main.less";
 import "select2/dist/css/select2.css";
 import "bootstrap/dist/js/npm.js";
@@ -19,7 +20,9 @@ import "./helpers/layout";
 
 import "./tableRequestsMsg/TableRequestMsg.html";
 import "./tableRequestsMsg/TableRequestMsgHelper.js";
+import "./frappe/login.js";
 
+/*
 import * as Collections from "../lib/collections";
 import { Reaction } from "/client/api";
 import { Restaurant as RestaurantLib } from "../lib";
@@ -27,3 +30,4 @@ import { Restaurant as RestaurantLib } from "../lib";
 //RestMessager = toastr;
 //Restaurant = Object.assign(RestaurantLib, {toastr: toastr});
 Object.assign(Reaction.Collections, Collections);
+*/

@@ -1,0 +1,53 @@
+
+
+<template name = "guestClientsInTable">
+  {{#if hasGuestClients}}
+        <div class="alert alert-danger hidden" id="alertGuestClientsTable">Oh! Snap!</div>
+          <table class="table table-striped table-hover" id="guestClientsTable">
+              <caption>Guest Clients</caption>
+              <thead>
+                <tr>
+                  <th>
+                    Id
+                  </th>
+                  <th>
+                    Name
+                  </th>
+                  <th>
+                    Request
+                  </th>
+                  <th>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {{#each client in guestClients}}
+                  <tr class='clickable-row' id="guestclient{{client.toClientId}}">
+                    <td>
+                      {{client.toClientId}}
+                    </td>
+                    <td>
+                      {{client.requesterName}}
+                    </td>
+                    <td>
+                      ({{timeAgo client.createdAt}})
+                    </td>
+                    <td>
+                      <button type="button" class="btn btn-default danger-action pull-right" data-masterClientNumber={{client.fromClientId}} data-clientId={{client.toClientId}} data-id={{client._id}} data-event-action="removeClientRequest" title="Remove Request">
+                        <i class="fa fa-close"></i>
+                      </button>
+                    </td>
+                  </tr>
+                {{/each}}
+            </tbody>
+          </table>
+        <form>
+          <div class="form-group">
+            <button type="button" class="btn btn-primary btn-lg btn-block hidden" data-event-action="removeClientRequestConfirm">Confirm</button>
+            <button type="button" class="btn btn-default btn-lg btn-block hidden" data-event-action="removeClientRequestCancel">Cancel</button>
+          </div>
+        </form>
+  {{else}}
+    <p>{{{textGuestClients}}}</p>
+  {{/if}}
+</template>

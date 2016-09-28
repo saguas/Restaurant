@@ -4,9 +4,6 @@ import { Products, Tags } from "/lib/collections";
 import { Session } from "meteor/session";
 import { Template } from "meteor/templating";
 import { ITEMS_INCREMENT } from "/client/config/defaults";
-import { $ } from "meteor/jquery";
-import { ReactiveDict } from "meteor/reactive-dict";
-
 
 /**
  * loadMoreProducts
@@ -17,7 +14,7 @@ import { ReactiveDict } from "meteor/reactive-dict";
  */
 function loadMoreProducts() {
   let threshold;
-  let target = $("#productScrollLimitLoader");
+  const target = $("#productScrollLimitLoader");
   let scrollContainer = $("#reactionAppContainer");
 
   if (scrollContainer.length === 0) {

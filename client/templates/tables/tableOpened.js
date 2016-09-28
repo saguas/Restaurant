@@ -1,6 +1,6 @@
 import { Template } from "meteor/templating";
 import { Reaction, Logger } from "/client/api";
-import { Restaurant, TableMap } from "../../../lib";
+import { Restaurant, TableMap, ClientsTable } from "../../../lib";
 import { Session } from "meteor/session";
 //import { ReactiveDict } from "meteor/reactive-dict";
 import { ReactiveVar } from 'meteor/reactive-var';
@@ -34,5 +34,19 @@ Template.tableOpened.onRendered(function () {
     data: TableMap.flatMap,
     templateResult: formatState,
     templateSelection: template
-  })
+  });
+  console.log("tableOpened this ", Template.currentData());
+});
+
+
+Template.tableOpened.helpers({
+  masterName: function(){
+    const dict = Template.currentData().dict;
+    let masterName = "";
+    const clientsTable = ClientsTable.findOne({masterClientNumber: parseInt(dict.get("btnClientId"))});
+    if(clientsTable){
+      masterName = clientsTable.masterName;
+    }
+    return masterName;
+  }
 });

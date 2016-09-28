@@ -1,0 +1,65 @@
+
+<template name = "requestClientTable">
+  <div class="alert alert-danger hidden" id="alertRequestTablePermissions">Oh! Snap!</div>
+  {{#if showJoin}}
+        {{#if hasRequestsPendents}}
+            <table class="table table-hover" id="requestsPendents">
+                <caption>Requests Pendents</caption>
+                <thead>
+                    <th>
+                      Client Id
+                    </th>
+                    <th>
+                      Table
+                    </th>
+                    <th>
+                      Request Time
+                    </th>
+                    <th>
+                    </th>
+                </thead>
+                <tbody>
+                  {{#each requestsPendents}}
+                    <tr class='clickable-row' id="guestclientrequest{{toClientId}}">
+                      <td>
+                        {{toClientId}}
+                      </td>
+                      <td>
+                        {{tableName}}
+                      </td>
+                      <td>
+                        ({{timeAgo createdAt}})
+                      </td>
+                      <td>
+                        <button type="button" class="btn btn-default danger-action pull-right" data-toClientId={{toClientId}} data-id={{_id}} data-event-action="removeClientRequest" title="Remove Request">
+                          <i class="fa fa-close"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  {{/each}}
+              </tbody>
+            </table>
+            <form>
+              <div class="form-group">
+                <button type="button" class="btn btn-primary btn-lg btn-block hidden" data-event-action="removeClientRequestConfirm">Confirm</button>
+                <button type="button" class="btn btn-default btn-lg btn-block hidden" data-event-action="removeClientRequestCancel">Cancel</button>
+              </div>
+            </form>
+        {{/if}}
+      {{#unless hasRequestsPendents}}
+          <div class="checkbox">
+           <label>
+             <input type="checkbox"  data-event-action="checkboxJointClient"> Joint to a Table.
+           </label>
+          </div>
+          <form class="hide" data-event-action="formJointClient">
+            <div class="form-group">
+              <label for="clientId">Client ID</label>
+              <input type="text" class="form-control" id="clientId" placeholder="Client Id" data-event-action="textClientId" tabindex="1">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg btn-block"  data-event-action="requestClientPermission">Join</button>
+          </form>
+      {{/unless}}
+  {{/if}}
+</template>

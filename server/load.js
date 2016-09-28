@@ -37,11 +37,13 @@ if (Hooks) {
 
   Hooks.Events.add("onLogin", (opts) => {
     //console.log("opts: ", opts);
+    console.log("userId: ", opts.user._id);
+    console.log("opts: ", opts);
     console.log("sessionId: ", Reaction.sessionId);
     let group = Reaction.getShopId();
     console.log("onLogin shopId: ", group);
-    console.log("Roles.userIsInRole ", Roles.userIsInRole(opts.user._id, ["cart/checkout", "table/request"], group));
-    console.log("Roles.userIsInRole ", Reaction.hasPermission(["table/request"], opts.user._id, group));
+    console.log("Roles.userIsInRole ", Roles.userIsInRole(opts.user._id, ["cart/checkout", "client/table"], group));
+    console.log("Roles.userIsInRole ", Reaction.hasPermission(["client/table"], opts.user._id, group));
     //opts.user.roles[group].push("client/table");
     console.log("onLogin userId: ", opts.user.roles);
     //adicionar um item às regras

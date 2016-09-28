@@ -152,14 +152,20 @@ Template.restaurantOpenTable.events({
       instance.dict.set("showTablesOrClient", true);
       instance.dict.set("showBreadCrumbMenu", false);
       instance.dict.set("breadCrumbMiddleMenu",[]);
-      instance.$(".floors.active").button('reset');
+      //const buttonFloors = instance.$(".floors.active");
+      //const buttonFloors = instance.$(".btn-group.tables");
+      //const buttonFloors = $(".btn-group.tables");
+      //if(buttonFloors.length > 0){
+      $(".btn-group.tables").removeClass("active").end().find('[type="radio"][data-event-floor="true"]').prop('checked', false);
+        //buttonFloors.button('reset');
+      //}
       instance.dict.set("btnClientId", 0);
       Restaurant.resetTables(instance.dict);
 
       return;
     }
-    instance.$(".tables.active").button('reset');
-    instance.$(".tables.active").removeClass("active");
+    //instance.$(".tables.active").button('reset');
+    instance.$(".tables.active").removeClass("active").end().find('[type="radio"][data-event-floor="true"]').prop('checked', false);;
     Session.set("floor", breadcrumbName);
     let breadcrumbId = event.currentTarget.dataset.eventBreadcrumbmenuid;
     let breadcrumbnewmenu = Restaurant.breadcrumbRemoveLast(instance.dict.get("breadCrumbMiddleMenu"));

@@ -14,7 +14,10 @@ if (Hooks) {
         return user;
 
       user.clientId = nextAutoincrement(ClientCounters);//getNextSequence("clientid");
-      console.log("onCreateUser clientId ", user.clientId);
+      /*if(!user.username){
+        user.username = user.emails[0].address;
+      }*/
+      console.log("onCreateUser clientId ", user.clientId, user.username);
         //user.clientId = 104;
       return user;
     });
